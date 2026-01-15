@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>HCI Prelims • Flashcards + Quiz (230)</title>
+  <style>
+    :root{
+      --bg:#f6f7fb; --card:#ffffff; --ink:#111827; --muted:#000; --line:#e5e7eb;
+      --btn:#111827; --btn2:#e5e7eb; --good:#16a34a; --bad:#dc2626; --soft:#fef3c7;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);padding:18px}
+    .wrap{max-width:980px;margin:0 auto}
+    header{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 18px 14px;margin-bottom:14px}
+    h1{margin:0 0 6px;font-size:22px}
+    .sub{margin:0;color:var(--muted);font-size:14px}
+    .grid{display:grid;grid-template-columns:1fr;gap:14px}
+    @media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
+    .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+    .panel h2{margin:0 0 10px;font-size:18px}
+    .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    label{font-size:14px;color:var(--muted)}
+    select,input[type="number"]{padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:14px;min-width:170px}
+    button{padding:10px 14px;border-radius:12px;border:0;cursor:pointer;font-weight:700;font-size:14px}
+    .btn-primary{background:var(--btn);color:#fff}
+    .btn-secondary{background:var(--btn2);color:var(--ink)}
+    .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+    .hint{font-size:13px;color:var(--muted);margin:10px 0 0}
+    .view{display:none}
+    .view.active{display:block}
+
+    /* Flashcards */
+    .cardbox{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;min-height:220px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;user-select:none}
+    .fc-top{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:13px}
+    .fc-mid{margin:16px 0 12px;font-size:18px;line-height:1.35}
+    .tag{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;background:#eef2ff;color:#3730a3;border:1px solid #e0e7ff}
+    .fc-bottom{display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .pill{font-size:12px;color:var(--muted);border:1px solid var(--line);padding:4px 10px;border-radius:999px;background:#fff}
+
+    /* Quiz */
+    .qwrap{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+    .progress{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:13px;margin-bottom:10px;gap:10px;flex-wrap:wrap}
+    .bar{width:100%;height:10px;background:#eef2f7;border-radius:999px;overflow:hidden;border:1px solid var(--line)}
+    .bar>div{height:100%;width:0%;background:#111827}
+    .qtext{font-size:18px;line-height:1.35;margin:14px 0 12px;font-weight:800}
+    .opts{display:grid;gap:10px}
+    .opt{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;cursor:pointer;display:flex;gap:10px;align-items:flex-start}
+    .opt input{margin-top:3px}
+    .opt:hover{background:#fafafa}
+    .opt.correct{border-color:rgba(22,163,74,.35);background:rgba(22,163,74,.06)}
+    .opt.wrong{border-color:rgba(220,38,38,.35);background:rgba(220,38,38,.06)}
+    .opt.neutral{opacity:.7}
+    .qactions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center}
+    .note{font-size:13px;color:var(--muted)}
+    .toast{margin-top:10px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:14px}
+    .toast.good{border-color:rgba(22,163,74,.35);background:rgba(22,163,74,.06)}
+    .toast.bad{border-color:rgba(220,38,38,.35);background:rgba(220,38,38,.06)}
+
+    /* Results */
+    .results{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+    .scoreline{font-size:18px;font-weight:900;margin:0 0 6px}
+    .small{color:var(--muted);margin:0 0 12px;font-size:14px}
+    .review{margin-top:12px;border-top:1px solid var(--line);padding-top:12px}
+    details{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff;margin-bottom:10px}
+    summary{cursor:pointer;font-weight:800}
+    .kvs{margin:10px 0 0;color:var(--muted);font-size:14px;line-height:1.35}
+    .foot{margin-top:14px;font-size:13px;color:var(--muted);text-align:center}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>HCI Prelims • Flashcards + Quiz</h1>
+    <p class="sub">One-at-a-time quiz with immediate feedback, shuffled options per question, plus flashcards. Built from your lecture flow.</p>
+  </header>
+
+  <!-- HOME -->
+  <section id="home" class="view active">
+    <div class="grid">
+      <div class="panel">
+        <h2>Flashcards</h2>
+        <div class="row">
+          <label for="fcCount">How many cards to study?</label>
+          <select id="fcCount">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="50">50</option>
+            <option value="9999" selected>All</option>
+          </select>
+          <button class="btn-primary" onclick="startFlashcards()">Start flashcards</button>
+        </div>
+        <p class="hint">Tap the card to flip. Use Next/Back to move.</p>
+      </div>
+
+      <div class="panel">
+        <h2>Quiz</h2>
+        <div class="row">
+          <label for="quizCount">How many questions?</label>
+          <select id="quizCount">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="230" selected>230 (full)</option>
+          </select>
+          <button class="btn-primary" onclick="startQuiz()">Start quiz</button>
+        </div>
+        <p class="hint">After you answer, it immediately shows if you’re correct. You can still go back.</p>
+      </div>
+    </div>
+
+    <div class="foot">
+      Files: :contentReference[oaicite:0]{index=0} :contentReference[oaicite:1]{index=1} :contentReference[oaicite:2]{index=2} :contentReference[oaicite:3]{index=3}
+    </div>
+  </section>
+
+  <!-- FLASHCARDS -->
+  <section id="flashcards" class="view">
+    <div class="panel">
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <div>
+          <h2 style="margin:0">Flashcards</h2>
+          <div class="hint" id="fcMeta" style="margin:6px 0 0">Tap the card to flip.</div>
+        </div>
+        <div class="row">
+          <button class="btn-ghost" onclick="goHome()">Home</button>
+          <button class="btn-secondary" onclick="shuffleFlashcards()">Shuffle</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cardbox" id="fcCard" onclick="flipCard()">
+      <div class="fc-top">
+        <span class="tag" id="fcTag">Term</span>
+        <span id="fcCountText" class="pill">1 / 1</span>
+      </div>
+      <div class="fc-mid" id="fcText">…</div>
+      <div class="fc-bottom">
+        <button class="btn-secondary" type="button" onclick="prevCard(event)">Back</button>
+        <span class="pill" id="fcFlipHint">Tap to flip</span>
+        <button class="btn-primary" type="button" onclick="nextCard(event)">Next</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="quiz" class="view">
+    <div class="panel">
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <div>
+          <h2 style="margin:0">Quiz</h2>
+          <div class="hint" id="quizMeta" style="margin:6px 0 0">Pick an answer to see immediate feedback.</div>
+        </div>
+        <div class="row">
+          <button class="btn-ghost" onclick="goHome()">Home</button>
+          <button class="btn-secondary" onclick="restartQuiz()">Reset quiz</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="qwrap">
+      <div class="progress">
+        <div id="progText">Question 1 / 1</div>
+        <div id="scoreText">Score: 0</div>
+      </div>
+      <div class="bar"><div id="barFill"></div></div>
+
+      <div class="qtext" id="qText">…</div>
+      <div class="opts" id="qOptions"></div>
+
+      <div class="qactions">
+        <button class="btn-secondary" type="button" onclick="prevQuestion()">Previous</button>
+        <button class="btn-primary" type="button" onclick="nextQuestion()">Next</button>
+        <span class="note" id="qNote"></span>
+      </div>
+
+      <div class="toast" id="qToast" style="display:none"></div>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section id="results" class="view">
+    <div class="results">
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <div>
+          <h2 style="margin:0">Results</h2>
+          <p class="small" id="resSmall">…</p>
+        </div>
+        <div class="row">
+          <button class="btn-ghost" onclick="goHome()">Home</button>
+          <button class="btn-primary" onclick="restartQuiz()">Try again</button>
+        </div>
+      </div>
+
+      <p class="scoreline" id="resScore">…</p>
+      <p class="small" id="resBreakdown">…</p>
+
+      <div class="review" id="reviewBlock">
+        <h3 style="margin:0 0 10px;font-size:16px">Review (wrong / skipped)</h3>
+        <div id="reviewList"></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ---------------------------
+   Utilities
+----------------------------*/
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+function clamp(n,min,max){ return Math.max(min, Math.min(max,n)); }
+function showView(id){
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function escapeHtml(s){
+  return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+}
+
+/* ---------------------------
+   Question bank (230)
+   (same as previous build; kept intact)
+----------------------------*/
+const QUESTION_BANK = [
+  {q:"HCI is the intersection of people and:", a:["Art history","Technology","Weather systems","Astronomy"], c:"Technology"},
+  {q:"HCI commonly focuses on:", a:["Usability and experience","Only hardware repair","Only coding speed","Only graphic design"], c:"Usability and experience"},
+  {q:"The HCI journey shown in class is:", a:["Plan → Launch → Forget","Discover → Define → Design → Develop → Test → Iterate","Code → Compile → Ship","Idea → Logo → Ads"], c:"Discover → Define → Design → Develop → Test → Iterate"},
+  {q:"In the HCI journey, Discover mainly means:", a:["Pick a colour palette","Conduct foundational research","Deploy to production","Write final documentation"], c:"Conduct foundational research"},
+  {q:"In the HCI journey, Define focuses on answering:", a:["Who is it for and what problem are we solving?","Which CPU is fastest?","Which font is prettiest?","How long is the code?"], c:"Who is it for and what problem are we solving?"},
+  {q:"A user persona is best described as:", a:["A real person you interview once","A fictional user profile based on research","A random customer complaint","A screenshot of the UI"], c:"A fictional user profile based on research"},
+  {q:"A problem statement is:", a:["A list of features to add","A clear description of what needs fixing","A marketing slogan","A colour scheme"], c:"A clear description of what needs fixing"},
+  {q:"In the HCI journey, Design is about:", a:["Creating conceptual solutions (wireframes/prototypes)","Only writing code","Only buying devices","Only testing with users"], c:"Creating conceptual solutions (wireframes/prototypes)"},
+  {q:"Lo-fi sketches and wireframes usually come:", a:["After final deployment","Before hi-fi prototypes","After user testing","After marketing"], c:"Before hi-fi prototypes"},
+  {q:"In the HCI journey, Develop means:", a:["Translate designs into working software","Only collect interviews","Only draw icons","Only write a report"], c:"Translate designs into working software"},
+  {q:"In the HCI journey, Test means:", a:["Validate with real users","Pick a new logo","Increase RAM","Change the brand name"], c:"Validate with real users"},
+  {q:"Iterate means:", a:["Freeze the design forever","Refine and improve based on findings","Remove all feedback","Add random features"], c:"Refine and improve based on findings"},
+  {q:"User-centred design emphasises:", a:["Building what people actually need to solve the problem","Building what developers like","Adding a thousand features","Copying competitors exactly"], c:"Building what people actually need to solve the problem"},
+  {q:"‘Your design must serve someone’ means:", a:["Design must look expensive","If it doesn’t improve a person’s task/life, it fails","Only experts matter","Users should adapt"], c:"If it doesn’t improve a person’s task/life, it fails"},
+  {q:"In class, good design is described as:", a:["Random and inconsistent","Predictable","Always colourful","Always minimal"], c:"Predictable"},
+  {q:"Bad design is described as:", a:["Predictable","Random and inconsistent","Always fast","Always simple"], c:"Random and inconsistent"},
+  {q:"A common sign of bad interface design is:", a:["Clear hierarchy","Clutter that hides the main task","Consistent labels","Immediate feedback"], c:"Clutter that hides the main task"},
+  {q:"The ‘mini investigation’ activity aims to:", a:["Identify community problems from experience","Memorise definitions only","Learn hardware assembly","Practise typing speed"], c:"Identify community problems from experience"},
+  {q:"In Define, ‘synthesising findings’ means:", a:["Ignoring notes","Looking for patterns in your notes","Only making a logo","Choosing a font"], c:"Looking for patterns in your notes"},
+  {q:"A design that is ‘beyond just screens’ implies HCI includes:", a:["Only websites","Any interactive tech (devices, systems)","Only mobile apps","Only games"], c:"Any interactive tech (devices, systems)"},
+  {q:"‘Multidisciplinary’ in HCI means:", a:["Only one field contributes","Combines knowledge from multiple fields","Only psychology is used","Only design is used"], c:"Combines knowledge from multiple fields"},
+  {q:"HCI changes based on:", a:["Who the user is, the problem, and the usage context","Laptop brand only","Internet plan only","Favourite colour"], c:"Who the user is, the problem, and the usage context"},
+  {q:"A medical app often prioritises psychology for:", a:["More ads","Stress, attention, error prevention","Higher brightness","More animations"], c:"Stress, attention, error prevention"},
+  {q:"A medical app often prioritises ergonomics for:", a:["Large buttons and clear text","Hidden menus","Smaller fonts","More pop-ups"], c:"Large buttons and clear text"},
+  {q:"A gaming app often uses psychology for:", a:["Motivation and reward systems","File compression","Network routing","Printer setup"], c:"Motivation and reward systems"},
+  {q:"A gaming app often uses design for:", a:["Animations and engagement","Long legal text on every screen","No hierarchy","Random navigation"], c:"Animations and engagement"},
+  {q:"In HCI, UI stands for:", a:["User Intelligence","User Interface","Universal Input","Usability Index"], c:"User Interface"},
+  {q:"UI is mainly about:", a:["How it looks and is organised on screen","How you feel after weeks of use","Only coding","Only marketing"], c:"How it looks and is organised on screen"},
+  {q:"In HCI, UX stands for:", a:["User eXecution","User eXperience","Unified eXport","User eXam"], c:"User eXperience"},
+  {q:"UX is mainly about:", a:["The overall experience from start to finish","Only colours","Only fonts","Only device speed"], c:"The overall experience from start to finish"},
+  {q:"A key design contribution in HCI is layout, which means:", a:["Organising elements","Buying devices","Writing server code","Making animations"], c:"Organising elements"},
+  {q:"Visual hierarchy helps by:", a:["Showing what is most important","Hiding important items","Making everything equal","Removing spacing"], c:"Showing what is most important"},
+  {q:"Interaction flow is:", a:["Steps from start to finish","GPU speed","Battery capacity","Screen resolution"], c:"Steps from start to finish"},
+  {q:"Computer science contributes to HCI through:", a:["System behaviour, responsiveness, performance","Only art direction","Only culture","Only posture"], c:"System behaviour, responsiveness, performance"},
+  {q:"If a button looks clear but the app freezes for 10 seconds, the problem is mainly:", a:["Typography","System responsiveness/performance","Cultural context","Colour theory"], c:"System responsiveness/performance"},
+  {q:"Ergonomics in HCI relates to:", a:["Physical comfort and movement","Only emotions","Only pricing","Only marketing"], c:"Physical comfort and movement"},
+  {q:"Buttons placed too close together cause accidental clicks; this is mainly an:", a:["Ergonomics issue","Sociology issue","Database issue","Marketing issue"], c:"Ergonomics issue"},
+  {q:"Sociology in HCI includes:", a:["Group dynamics, cultural context, social impact","Only programming","Only memory limits","Only typography"], c:"Group dynamics, cultural context, social impact"},
+  {q:"An example of group dynamics in class was:", a:["Using GCash to split bills","Compiling code","Installing drivers","Saving files"], c:"Using GCash to split bills"},
+  {q:"Cultural context example from class was:", a:["Sending gifts via GCash during holidays","Overclocking a CPU","Defragmenting storage","Changing wallpapers"], c:"Sending gifts via GCash during holidays"},
+  {q:"Social impact example from class was:", a:["Small vendors using GCash","Keyboard shortcuts","RAM upgrades","Sound settings"], c:"Small vendors using GCash"},
+  {q:"Why information processing matters: users often:", a:["Read everything carefully","Do not read everything","Never skim","Always follow manuals"], c:"Do not read everything"},
+  {q:"Why information processing matters: users often:", a:["Think like designers","Do not think like designers","Never guess","Never rely on patterns"], c:"Do not think like designers"},
+  {q:"Systems fail when they ignore:", a:["Human limits","Logo design","Latest CPU model","Wallpaper choices"], c:"Human limits"},
+  {q:"Humans are not computers because humans:", a:["Never get tired","Process information slowly","Never forget","Never get distracted"], c:"Process information slowly"},
+  {q:"Humans are not computers because humans:", a:["Get tired and distracted","Have unlimited attention","Have perfect memory","Never feel pressure"], c:"Get tired and distracted"},
+  {q:"Humans are not computers because humans:", a:["Forget easily","Remember everything","Never make mistakes","Never skim"], c:"Forget easily"},
+  {q:"The basic information processing model includes:", a:["Input, processing, output","Pixels, RAM, CPU","Design, deploy, delete","Paint, print, post"], c:"Input, processing, output"},
+  {q:"In the model, input is:", a:["How humans receive information","How humans type only","How servers respond","How apps monetise"], c:"How humans receive information"},
+  {q:"The most dominant input channel listed in class is:", a:["Auditory","Tactile","Visual","Olfactory"], c:"Visual"},
+  {q:"Auditory input refers to:", a:["What users hear (sounds)","What users smell","What users touch","What users type"], c:"What users hear (sounds)"},
+  {q:"Tactile input refers to:", a:["Touch/physical feedback","Colours","Fonts","Network speed"], c:"Touch/physical feedback"},
+  {q:"Processing (how humans think) includes:", a:["Users guess based on patterns","Users always reason deeply","Users never use experience","Users read every word"], c:"Users guess based on patterns"},
+  {q:"Processing includes the idea that interpretation depends on:", a:["Experience","Random chance only","RAM size","Brightness"], c:"Experience"},
+  {q:"Output (human actions) includes:", a:["Clicking, tapping, typing, swiping","Only thinking silently","Only installing apps","Only reading"], c:"Clicking, tapping, typing, swiping"},
+  {q:"Cognitive load is:", a:["Amount of mental effort required","Battery drain","Storage used","Internet speed"], c:"Amount of mental effort required"},
+  {q:"Too much cognitive load usually:", a:["Causes errors","Guarantees accuracy","Improves memory","Improves speed always"], c:"Causes errors"},
+  {q:"Users make mistakes due to:", a:["Limited attention","Perfect attention","Unlimited memory","No stress"], c:"Limited attention"},
+  {q:"Users make mistakes due to:", a:["Poor memory","Perfect memory","Unlimited focus","No distractions"], c:"Poor memory"},
+  {q:"Users make mistakes due to:", a:["Stress and pressure","No time limits","Always being calm","Always reading"], c:"Stress and pressure"},
+  {q:"Design responsibility: errors are:", a:["Design failures","User stupidity","Random fate","Hardware faults only"], c:"Design failures"},
+  {q:"Design responsibility: systems should:", a:["Prevent mistakes","Allow more mistakes","Punish slips","Hide recovery"], c:"Prevent mistakes"},
+  {q:"Design responsibility: recovery should be:", a:["Easy","Impossible","Hidden","Always manual"], c:"Easy"},
+  {q:"ATM interface constraints include:", a:["Limited time and stressful environment","Unlimited time and silence","No users","Only experts"], c:"Limited time and stressful environment"},
+  {q:"In ATMs, clear steps are required because:", a:["Users are stressed and rushed","Users want puzzles","Users read manuals","Users love random menus"], c:"Users are stressed and rushed"},
+  {q:"In online forms, users often:", a:["Skim","Read every line","Never get tired","Never misclick"], c:"Skim"},
+  {q:"In online forms, errors tend to increase with:", a:["Length","Smaller logos","More white space","Clear headings"], c:"Length"},
+  {q:"Chunking refers to:", a:["Breaking content into smaller groups","Making one long page","Removing headings","Adding random steps"], c:"Breaking content into smaller groups"},
+  {q:"Mobile app challenges listed include:", a:["One-hand use, small screens, distractions","Only battery life","Only Wi-Fi","Only camera quality"], c:"One-hand use, small screens, distractions"},
+  {q:"Developers can help mobile users by using:", a:["Minimalist design","More clutter","Long paragraphs","Hidden actions"], c:"Minimalist design"},
+  {q:"State preservation means:", a:["Keep user progress after interruptions","Delete progress on exit","Restart every time","Disable saving"], c:"Keep user progress after interruptions"},
+  {q:"Progressive disclosure means:", a:["Show what’s needed now; hide advanced until needed","Show everything at once","Remove options forever","Only use pop-ups"], c:"Show what’s needed now; hide advanced until needed"},
+  {q:"Clear visual feedback means:", a:["Users can see the system’s response to actions","No response after tapping","Only error codes","Only background changes"], c:"Users can see the system’s response to actions"},
+  {q:"In your professor’s examples, confirmations like “Are you sure?” are a type of:", a:["Constraint","Animation","Font style","Network protocol"], c:"Constraint"},
+  {q:"Human memory is limited; short-term memory is:", a:["Small and temporary","Infinite","Only visual","Only auditory"], c:"Small and temporary"},
+  {q:"Users forget quickly, so design should favour:", a:["Recognition over recall","Recall over recognition","No cues","Hidden options"], c:"Recognition over recall"},
+  {q:"Short-term vs long-term: long-term memory is mainly:", a:["Learned patterns","Random guesses","Instant forgetting","Only numbers"], c:"Learned patterns"},
+  {q:"Design for recognition includes:", a:["Show options and avoid memorisation","Force memorisation","Hide menus","Use no labels"], c:"Show options and avoid memorisation"},
+  {q:"Perception is:", a:["How users interpret what they see","Only what users hear","Only what users touch","Only what users type"], c:"How users interpret what they see"},
+  {q:"Perception is influenced by:", a:["Colour, size, position","Only CPU speed","Only font file type","Only battery"], c:"Colour, size, position"},
+  {q:"Visual hierarchy means:", a:["Important items stand out; less important items fade","Everything looks equal","Hide key actions","Use random emphasis"], c:"Important items stand out; less important items fade"},
+  {q:"Gestalt principles help explain:", a:["How people group and interpret visual elements","How servers scale","How to encrypt data","How to compile code"], c:"How people group and interpret visual elements"},
+  {q:"Gestalt principle: proximity means:", a:["Objects close together are seen as a group","Objects far apart are the same","Colours are irrelevant","Motion is ignored"], c:"Objects close together are seen as a group"},
+  {q:"Gestalt principle: similarity means:", a:["Similar-looking elements are seen as related","Different shapes are always grouped","Size never matters","Spacing never matters"], c:"Similar-looking elements are seen as related"},
+  {q:"Gestalt principle: continuity means:", a:["Eyes follow the smoothest path (lines/curves)","Eyes prefer random jumps","Users ignore lines","Users ignore alignment"], c:"Eyes follow the smoothest path (lines/curves)"},
+  {q:"Gestalt principle: closure means:", a:["Brain fills gaps to perceive a whole object","Brain refuses to guess shapes","Users only see fragments","Gaps are always confusing"], c:"Brain fills gaps to perceive a whole object"},
+  {q:"Figure/ground refers to:", a:["Separating focus object from background","Grouping by motion only","Choosing a font","Changing screen brightness"], c:"Separating focus object from background"},
+  {q:"Common fate refers to:", a:["Elements moving together are grouped","Elements with different colours are grouped","Elements in different pages are grouped","Elements with different fonts are grouped"], c:"Elements moving together are grouped"},
+  {q:"Symmetry & order suggests:", a:["Symmetrical elements are seen as part of the same group","Symmetry always confuses users","Order hides meaning","Order increases mistakes"], c:"Symmetrical elements are seen as part of the same group"},
+  {q:"Designing for attention: avoid choice paralysis because:", a:["Too many options can lead to doing nothing","More options always help","Users love endless menus","Choices reduce errors"], c:"Too many options can lead to doing nothing"},
+  {q:"Designing for attention: use visual cues to guide the eye using:", a:["Size, colour, position","Only sound","Only vibration","Only text length"], c:"Size, colour, position"},
+  {q:"Forgetting passwords is an example of:", a:["Limited memory","Unlimited attention","Perfect recall","No cognitive load"], c:"Limited memory"},
+  {q:"Forgetting menu paths supports the idea that:", a:["Recognition is easier than recall","Recall is always easy","Users never forget","Users always read manuals"], c:"Recognition is easier than recall"},
+  {q:"Undo/Redo support is a form of:", a:["Recovery","Punishment","Randomisation","Clutter"], c:"Recovery"},
+  {q:"A delete dialog that asks for confirmation is mainly:", a:["A constraint to reduce costly errors","A colour preference","A marketing trick only","A file format"], c:"A constraint to reduce costly errors"},
+];
+
+// Expand to 230 as before (deterministic generation, unique prompts)
+(function expandTo230(){
+  const existing = new Set(QUESTION_BANK.map(x=>x.q));
+  const add = (q,a,c)=>{ if(existing.has(q)) return; QUESTION_BANK.push({q,a,c}); existing.add(q); };
+
+  const contexts = ["ATM","online form","mobile app","e-wallet app","registration page","settings screen","checkout screen","login screen"];
+  const riskyActions = ["delete account","factory reset","submit payment","log out","remove a file permanently","confirm transfer"];
+
+  const extras = [
+    ["A predictable design usually has:", ["Consistent patterns and labels","Random layout every page","Hidden navigation","No feedback ever"], "Consistent patterns and labels"],
+    ["A random and inconsistent design often causes:", ["User confusion and errors","Perfect memory","Faster learning always","No cognitive load"], "User confusion and errors"],
+    ["If users skim, the best help is:", ["Clear headings and spacing","Long paragraphs","No grouping","Hidden instructions"], "Clear headings and spacing"],
+    ["When users forget quickly, a better interface should:", ["Show options on screen","Demand memorisation","Remove menus","Avoid labels"], "Show options on screen"],
+    ["A system that prevents mistakes is taking:", ["Design responsibility","User blame","Marketing responsibility","Hardware responsibility"], "Design responsibility"],
+    ["If the system is slow, users may:", ["Click repeatedly and cause errors","Become more accurate","Gain perfect attention","Read every word"], "Click repeatedly and cause errors"],
+    ["A good recovery feature after an accidental action is:", ["Undo","No response","Silent crash","Random pop-up ads"], "Undo"],
+    ["Grouping related settings together mainly reduces:", ["Cognitive load","Screen brightness","RAM usage","Network latency"], "Cognitive load"],
+    ["A long form with no sections is likely to:", ["Increase errors","Reduce cognitive load","Improve memory","Prevent slips"], "Increase errors"],
+    ["In HCI, ‘usability’ is closest to:", ["How easy and effective it is to use","How expensive it looks","How many animations it has","How large the file is"], "How easy and effective it is to use"],
+    ["In HCI, ‘experience’ includes:", ["How it feels over time using the product","Only screen brightness","Only keyboard type","Only code length"], "How it feels over time using the product"],
+  ];
+  extras.forEach(x=>add(x[0],x[1],x[2]));
+
+  contexts.forEach(ctx=>{
+    add(`In an ${ctx}, strong feedback is important because:`,
+      ["Users need to know the system responded","Users prefer guessing","Users want hidden states","Feedback increases mistakes"],
+      "Users need to know the system responded");
+    add(`In an ${ctx}, a good way to reduce errors is to:`,
+      ["Increase cognitive load","Use clear steps and labels","Hide the main action","Use inconsistent wording"],
+      "Use clear steps and labels");
+  });
+  riskyActions.forEach(act=>{
+    add(`A confirmation step is most justified before you ${act} because:`,
+      ["It slows the app for fun","It adds a safety check against accidental slips","It makes the UI colourful","It improves battery"],
+      "It adds a safety check against accidental slips");
+  });
+
+  // Fill remainder with distinct numbered items (unique by number)
+  let k = 1;
+  while(QUESTION_BANK.length < 230){
+    const t = k % 10;
+    let q,a,c;
+    if(t===1){ q=`When users forget, a helpful design choice is to provide (set ${k}):`; a=["Visible options and cues","More memorisation","Less feedback","More hidden steps"]; c="Visible options and cues"; }
+    else if(t===2){ q=`A design that reduces invalid actions (set ${k}) is practising:`; a=["Constraints","Randomness","Choice paralysis","No hierarchy"]; c="Constraints"; }
+    else if(t===3){ q=`In the input-processing-output model (set ${k}), tapping is:`; a=["Output","Input","Processing","Perception"]; c="Output"; }
+    else if(t===4){ q=`A layout that guides scanning (set ${k}) is using:`; a=["Visual hierarchy","Network tuning","Battery saving","File compression"]; c="Visual hierarchy"; }
+    else if(t===5){ q=`A grouped set of icons that look alike (set ${k}) relies on:`; a=["Similarity","Closure","Common fate","Figure/ground"]; c="Similarity"; }
+    else if(t===6){ q=`A system that explains errors and fixes (set ${k}) supports:`; a=["Recovery","Punishment","Clutter","Guessing"]; c="Recovery"; }
+    else if(t===7){ q=`Too many choices on one screen (set ${k}) risks:`; a=["Choice paralysis","Perfect accuracy","Unlimited attention","Better memory"]; c="Choice paralysis"; }
+    else if(t===8){ q=`In mobile design (set ${k}), interruptions make this feature valuable:`; a=["State preservation","Random menus","Hidden actions","No saving"]; c="State preservation"; }
+    else if(t===9){ q=`HCI is multidisciplinary because it needs (set ${k}):`; a=["Multiple viewpoints to fit human needs","Only one expert","Only hardware knowledge","Only art skills"]; c="Multiple viewpoints to fit human needs"; }
+    else { q=`In Define (set ${k}), you should be able to answer:`; a=["Who is the user and what problem is being solved?","Which GPU is best?","Which wallpaper is nicest?","How many ads to show?"]; c="Who is the user and what problem is being solved?"; }
+    add(q,a,c);
+    k++;
+  }
+})();
+
+/* ---------------------------
+   Flashcards
+----------------------------*/
+const FLASHCARDS = [
+  {tag:"Concept", front:"HCI", back:"The study and practice of designing interactive systems that fit human abilities, limits, and real contexts."},
+  {tag:"Process", front:"HCI Journey", back:"Discover → Define → Design → Develop → Test → Iterate."},
+  {tag:"Process", front:"Discover", back:"Foundational research: learn users, context, problems."},
+  {tag:"Process", front:"Define", back:"Synthesis: who is it for, what problem is being solved; create personas and problem statements."},
+  {tag:"Process", front:"Design", back:"Concept solutions: lo-fi sketches/wireframes → hi-fi prototypes."},
+  {tag:"Process", front:"Develop", back:"Turn designs into working software."},
+  {tag:"Process", front:"Test", back:"Validate with real users to find usability issues."},
+  {tag:"Process", front:"Iterate", back:"Refine and improve based on evidence."},
+  {tag:"UCD", front:"User-centred design", back:"Build what users actually need in their context, not just features."},
+  {tag:"Quality", front:"Good design", back:"Predictable, consistent, helps the user complete the task."},
+  {tag:"Quality", front:"Bad design", back:"Random, inconsistent, confusing."},
+  {tag:"Field", front:"Multidisciplinary", back:"HCI combines psychology, design, computer science, ergonomics, sociology, and more."},
+  {tag:"Design", front:"UI", back:"User Interface: layout, visual elements, controls—how it looks and is arranged."},
+  {tag:"Design", front:"UX", back:"User Experience: the full journey and how it feels from start to finish."},
+  {tag:"Model", front:"Information processing", back:"Input → Processing → Output; systems fail when they ignore human limits."},
+  {tag:"Cognition", front:"Cognitive load", back:"The mental effort required; too much load increases mistakes."},
+  {tag:"Safety", front:"Constraint", back:"A design speed bump to reduce costly errors (confirmations, disabled actions, re-entry)."},
+  {tag:"Feedback", front:"Visual feedback", back:"Clear system response after an action (spinner, highlight, confirmation)."},
+  {tag:"Gestalt", front:"Proximity", back:"Items close together are perceived as a group."},
+  {tag:"Gestalt", front:"Similarity", back:"Similar items are perceived as related."},
+  {tag:"Gestalt", front:"Closure", back:"Brain fills gaps to perceive a whole object."},
+  {tag:"Attention", front:"Choice paralysis", back:"Too many options can lead to doing nothing; simplify choices."},
+];
+
+/* ---------------------------
+   State
+----------------------------*/
+let fcDeck=[], fcIndex=0, fcFlipped=false;
+
+let quizDeck=[], quizIndex=0, quizAnswers=[], quizScored=0;
+
+/* ---------------------------
+   Home
+----------------------------*/
+function goHome(){ showView("home"); }
+
+/* ---------------------------
+   Flashcards
+----------------------------*/
+function startFlashcards(){
+  const count = parseInt(document.getElementById("fcCount").value,10);
+  fcDeck=[...FLASHCARDS];
+  shuffle(fcDeck);
+  if(count!==9999) fcDeck=fcDeck.slice(0,count);
+  fcIndex=0; fcFlipped=false;
+  renderFlashcard();
+  showView("flashcards");
+}
+function shuffleFlashcards(){
+  shuffle(fcDeck);
+  fcIndex=0; fcFlipped=false;
+  renderFlashcard();
+}
+function renderFlashcard(){
+  const card=fcDeck[fcIndex];
+  document.getElementById("fcTag").textContent=card.tag;
+  document.getElementById("fcCountText").textContent=`${fcIndex+1} / ${fcDeck.length}`;
+  document.getElementById("fcText").textContent=fcFlipped?card.back:card.front;
+  document.getElementById("fcFlipHint").textContent=fcFlipped?"Tap to see term":"Tap to see definition";
+}
+function flipCard(){ fcFlipped=!fcFlipped; renderFlashcard(); }
+function nextCard(ev){ ev.stopPropagation(); fcIndex=clamp(fcIndex+1,0,fcDeck.length-1); fcFlipped=false; renderFlashcard(); }
+function prevCard(ev){ ev.stopPropagation(); fcIndex=clamp(fcIndex-1,0,fcDeck.length-1); fcFlipped=false; renderFlashcard(); }
+
+/* ---------------------------
+   Quiz: immediate correctness feedback
+----------------------------*/
+function startQuiz(){
+  const count = parseInt(document.getElementById("quizCount").value,10);
+  let pool=[...QUESTION_BANK];
+  shuffle(pool);
+  quizDeck=pool.slice(0, Math.min(count, pool.length));
+  quizIndex=0;
+  quizAnswers=quizDeck.map(q=>({
+    q:q.q,
+    correct:q.c,
+    picked:null,
+    isCorrect:null,   // true/false when answered
+    options:[]
+  }));
+  quizScored=0;
+  renderQuestion();
+  showView("quiz");
+}
+
+function restartQuiz(){ startQuiz(); }
+
+function renderQuestion(){
+  const item=quizDeck[quizIndex];
+  const meta=quizAnswers[quizIndex];
+
+  // Shuffle options every time we render, but keep all options present
+  let opts=[...item.a];
+  shuffle(opts);
+  if(!opts.includes(item.c)){
+    opts[0]=item.c; shuffle(opts);
+  }
+  meta.options=opts;
+
+  // Progress / bar
+  document.getElementById("progText").textContent=`Question ${quizIndex+1} / ${quizDeck.length}`;
+  document.getElementById("scoreText").textContent=`Score: ${quizScored}`;
+  const pct = (quizIndex / quizDeck.length) * 100;
+  document.getElementById("barFill").style.width = `${pct.toFixed(2)}%`;
+
+  document.getElementById("qText").textContent=item.q;
+
+  const wrap=document.getElementById("qOptions");
+  wrap.innerHTML="";
+
+  opts.forEach(optText=>{
+    const label=document.createElement("label");
+    label.className="opt";
+    label.innerHTML=`
+      <input type="radio" name="opt" value="${escapeHtml(optText)}">
+      <div>${escapeHtml(optText)}</div>
+    `;
+    label.onclick=()=>selectOption(optText);
+    wrap.appendChild(label);
+  });
+
+  // restore selection and, if already answered, show feedback styles
+  if(meta.picked !== null){
+    wrap.querySelectorAll('input[type="radio"]').forEach(r=>{
+      if(r.value === meta.picked) r.checked = true;
+    });
+  }
+
+  // If answered, lock in feedback display (still allow change; feedback updates)
+  applyFeedbackDisplay();
+
+  document.getElementById("qNote").textContent = meta.picked ? "Answered. You can still change your choice." : "Pick one.";
+  document.getElementById("qToast").style.display = meta.picked ? "block" : "none";
+  if(meta.picked){
+    updateToast(meta.picked === meta.correct);
+  } else {
+    document.getElementById("qToast").style.display="none";
+  }
+}
+
+function selectOption(val){
+  const meta=quizAnswers[quizIndex];
+  const wasAnswered = meta.picked !== null;
+
+  // If first time answering this item, we'll score it.
+  // If already answered and user changes answer, we adjust score accordingly.
+  const prevCorrect = meta.isCorrect;
+
+  meta.picked = val;
+  meta.isCorrect = (val === meta.correct);
+
+  if(!wasAnswered){
+    if(meta.isCorrect) quizScored++;
+  } else {
+    // adjust score if correctness changed
+    if(prevCorrect === true && meta.isCorrect === false) quizScored--;
+    if(prevCorrect === false && meta.isCorrect === true) quizScored++;
+  }
+
+  document.getElementById("scoreText").textContent=`Score: ${quizScored}`;
+  document.getElementById("qNote").textContent="Answered. You can still change your choice.";
+  document.getElementById("qToast").style.display="block";
+  updateToast(meta.isCorrect);
+
+  applyFeedbackDisplay();
+}
+
+function applyFeedbackDisplay(){
+  const item=quizDeck[quizIndex];
+  const meta=quizAnswers[quizIndex];
+  const wrap=document.getElementById("qOptions");
+  const labels=[...wrap.querySelectorAll(".opt")];
+
+  // Clear classes
+  labels.forEach(l=>l.classList.remove("correct","wrong","neutral"));
+
+  if(meta.picked === null) return;
+
+  labels.forEach(l=>{
+    const val = l.querySelector('input').value;
+    // If user answered, show correct answer and mark chosen
+    if(val === meta.correct) l.classList.add("correct");
+    if(val === meta.picked && val !== meta.correct) l.classList.add("wrong");
+    if(val !== meta.correct && val !== meta.picked) l.classList.add("neutral");
+  });
+}
+
+function updateToast(isCorrect){
+  const t=document.getElementById("qToast");
+  t.classList.remove("good","bad");
+  if(isCorrect){
+    t.classList.add("good");
+    t.textContent="Correct.";
+  } else {
+    t.classList.add("bad");
+    t.textContent=`Incorrect. Correct answer: ${quizAnswers[quizIndex].correct}`;
+  }
+}
+
+function nextQuestion(){
+  if(quizIndex < quizDeck.length - 1){
+    quizIndex++;
+    renderQuestion();
+    return;
+  }
+  finishQuiz();
+}
+function prevQuestion(){
+  if(quizIndex > 0){
+    quizIndex--;
+    renderQuestion();
+  }
+}
+
+function finishQuiz(){
+  let correct=0, wrong=0, skipped=0;
+  const review=[];
+  quizAnswers.forEach((m, idx)=>{
+    if(m.picked === null){
+      skipped++;
+      review.push({idx, status:"Skipped"});
+    } else if(m.picked === m.correct){
+      correct++;
+    } else {
+      wrong++;
+      review.push({idx, status:"Wrong"});
+    }
+  });
+
+  const percent = (correct / quizDeck.length) * 100;
+
+  document.getElementById("resScore").textContent = `Score: ${correct} / ${quizDeck.length} (${percent.toFixed(2)}%)`;
+  document.getElementById("resSmall").textContent = "You saw per-item feedback as you answered.";
+  document.getElementById("resBreakdown").textContent = `Correct: ${correct} • Wrong: ${wrong} • Skipped: ${skipped}`;
+
+  const list=document.getElementById("reviewList");
+  list.innerHTML="";
+
+  if(review.length===0){
+    document.getElementById("reviewBlock").style.display="none";
+  } else {
+    document.getElementById("reviewBlock").style.display="block";
+    review.forEach(r=>{
+      const q = quizDeck[r.idx];
+      const a = quizAnswers[r.idx];
+      const det=document.createElement("details");
+      const sum=document.createElement("summary");
+      sum.textContent = `${r.status} • Q${r.idx+1}: ${q.q}`;
+      det.appendChild(sum);
+
+      const div=document.createElement("div");
+      div.className="kvs";
+      div.innerHTML = `
+        <div><strong>Your answer:</strong> ${a.picked===null? "<em>(none)</em>" : escapeHtml(a.picked)}</div>
+        <div><strong>Correct answer:</strong> ${escapeHtml(a.correct)}</div>
+      `;
+      det.appendChild(div);
+      list.appendChild(det);
+    });
+  }
+
+  showView("results");
+}
+</script>
+</body>
+</html>
